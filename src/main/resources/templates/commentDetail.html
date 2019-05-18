@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品详情页</title>
+    <script src='../plugins/js/echarts.min.js'></script>
+    <script src='../plugins/js/echarts-wordcloud.js'></script>
+     <link href="../../plugins/css/bootstrap.css"
+          rel="stylesheet">
+    <link href="../../plugins/bootstrap-table/bootstrap-table.min.css"
+          rel="stylesheet">
+    <script src="../../plugins/jquery/jquery-3.3.1.min.js"></script>
+    <script src="../../plugins/js/bootstrap.min.js"></script>
+    <script src="../../plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="../../plugins/bootstrap-table/bootstrap-table-locale-all.min.js"></script>
+       <style>
+        #pie{
+            width:400px;
+            height:400px;
+            margin: 20px auto;
+        }
+    </style>
+     <script>
+    $(function(){
+        pie();//初始化echarts图
+    })
+function pie(){
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('pie'));
+    option = {
+        title: {//标题组件
+        	text: "评论分布图",
+            textStyle: {
+                color: "#333333",
+                fontSize: 12,
+            }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: "{a} <br/>{b}: {c} ({d}%)",
+            textStyle:{    //图例文字的样式
+                color:'#fff',  //文字颜色
+                fontSize:10    //文字大小
+            }
+        },
+        graphic:[
+            {
+                type: 'text',
+                top: '100%',
+                left: 'center',
+                style: {
+                    text: '10000.00',
+                    fill: '#333333',
+                    fontSize: 20,
+                    fontWeight: 'normal'
+                }
+            },{
+                type: 'text',
+                top: '100%',
+                left: 'center',
+                style: {
+                    text: '好评',
+                    fill: '#A6A8B6',
+                    fontSize: 12,
+                    fontWeight: 'normal'
+                }
+            },
+        ],
+        //圆环的颜色
+        color:['#48cda6','#fd87fb','#11abff','#ffdf6f','#968ade'],
+        // 图例
+        legend: {
+            // 图例选择的模式，控制是否可以通过点击图例改变系列的显示状态。默认开启图例选择，可以设成 false 关闭。
+            selectedMode: true,
+            orient: 'vertical',
+            x : 'right',   //图例显示在右边
+            y: 'center',    //图例在垂直方向上面显示居中
+            bottom:0,
+            itemWidth:10,  //图例标记的图形宽度
+            itemHeight:10, //图例标记的图形高度
+            data:['好评','中评','差评','追评','视频晒单','晒图'],
+            textStyle:{    //图例文字的样式
+                color:'#A6A8B6',  //文字颜色
+                fontSize:10    //文字大小
+            }
+        },
+        series: [
+            {
+               	name:'评论比例',//代表a的值，系列名称
+                type:'pie',
+                center:['50%','45%'], //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。
+                radius: ['45%', '60%'],//饼图的半径，数组的第一项是内半径，第二项是外半径。[ default: [0, '75%'] ]
+                avoidLabelOverlap: true,
+                animation: false,   //是否禁用动画效果
+                label: {
+                    normal: {
+                        show: true,//是否显示标签
+                        //// 标签的位置。'outside'饼图扇区外侧，通过视觉引导线连到相应的扇区。'inside','inner' 同 'inside',饼图扇区内部。'center'在饼图中心位置。
+                        position: 'right',
+                        //显示的标签的内容
+                        //a（系列名称），b（数据项名称），c（数值）, d（百分比）
+                        formatter: "{a},{b}:{c}（{d}%）",
+},
+    emphasis: {
+        //鼠标放在圆环上显示的标签样式
+        show: true,
+            textStyle: {
+            fontSize: '12',
+                fontWeight: 'bold'
+        }
+    }
+},
+    labelLine: {
+        normal: {
+            show: true,//是否显示引导线
+                length:20,  //百分比引导线
+                length2:40    //视觉引导项第二段的长度。
+        }
+    },
+    itemStyle: {
+        normal: {
+            borderColor: "#FFFFFF",
+                borderWidth: 1,
+                label:{
+                show:true,
+                    formatter:'{d}%'
+            },
+        }
+    },
+    // 系列中的数据内容数组。
+    data:[]
+}
+]
+};
+    myChart.setOption(option);
+    $.get('test/queryMatchPieData?goodsSku='+goodsSku).done(function (data) {
+     	var resule = JSON.parse(data);
+     	console.log(resule);
+         // 填入数据
+   	     myChart.setOption({
+         	series: [{
+                 data: resule
+             }]
+         });
+    });
+}  
+
+
+    </script>
+    <script type="text/javascript">
+        var test = window.location.href;
+        var goodsSku = test.split("=")[1];
+        function loadData() {
+            $.ajax({
+                url : '/test/queryMatchCommentData',
+                data : "goodsSku=" + goodsSku,
+                cache : false,//false是不缓存，true为缓存
+                async : true,//true为异步，false为同步
+                beforeSend : function() {
+                    //请求前
+                },
+                success : function(result) {
+                    try {
+                        var resultArray = new Array();
+                        resultArray = JSON.parse(result);
+                        $("#table").bootstrapTable('load', resultArray);
+                    } catch (e) {
+                        window.alert(result);
+                        $("#table").bootstrapTable('load', [ {
+                            "result" : "什么也没有找到"
+                        } ]);
+                    }
+                },
+                complete : function() {
+                    //请求结束时
+                },
+                error : function() {
+                    //请求失败时
+                }
+            })
+        }
+    </script>
+    <script type="text/javascript">
+        function tableHeight() {
+        var h = $(window).height();
+        return h-25;
+        }
+        $(window).resize(function () {
+            $("#table").bootstrapTable('resetView', {
+                height: tableHeight()
+            });
+        });
+        $("#table").bootstrapTable("refresh");//表格刷新数据
+        $(function() {
+        	 $('#table').bootstrapTable({
+                 toolbar: '#toolbar',
+                 striped: true,           //是否显示行间隔色
+                 cache: false,            //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                 pagination: true,          //是否显示分页（*）
+                 queryParams: function (pageRequest) {
+                     return pageRequest;
+                 },
+                 showToggle: true,          //是否显示详细视图和列表视图的切换按钮
+                 cardView: false,          //是否显示详细视图
+                 detailView: true,          //是否显示父子表
+                 //传递参数（*）
+                 sidePagination: "client",      //分页方式：client客户端分页，server服务端分页（*）
+                 pageNumber: 1,            //初始化加载第一页，默认第一页
+                 pageSize: 10,            //每页的记录行数（*）
+                 pageList: [10, 20, 50, 100],    //可供选择的每页的行数（*）
+                 showHeader: true,
+                 showFooter: true,
+                 showColumns: true,
+                 showRefresh: true,
+                 showToggle: true,
+                 showPaginationSwitch: true,
+                 showFullscreen: true,
+                 search: true,
+                 uniqueId: "goods_sku",
+                 showExport: true, //是否显示导出按钮
+                 buttonsAlign: "right", //按钮位置
+                 exportTypes: ['excel'], //导出文件类型
+                 Icons: 'glyphicon-export',
+                 cardView: false,          //是否显示详细视图
+                 detailView: true,          //是否显示父子表
+                 columns : [
+                     {
+                         field: 'column_hidden',
+                         title: '隐藏列',
+                         titleTooltip: '你看不见我',
+                         visible: false,
+                         cardVisible: false,
+                         formatter: function(value, row, index) {
+                             return index;
+                         }
+                     },{
+                         field : 'username',
+                         title : '评论用户',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle',
+                         /*  sortable: true,
+                         switchable: false,
+                         order: 'asc',
+                         sortName: 'goods_price',
+                        sorter: function(a, b) {
+                             alert(a);
+                             return a - b;
+                         }, */
+                         cellStyle: function cellStyle(value, row, index, field) {
+                             return {
+                                 classes: 'text-nowrap another-class',
+                                 css: {
+                                     "color": "blue",
+                                     "font-size": "15px"
+                                 }
+                             }
+                         },
+                         escape: false
+                     }, {
+                         field : 'itemUrl',
+                         title : '评论商品链接',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle',
+                         formatter: function(value, row, index) {
+                             return '<a href="javascript:void(0);" class="goods_sku">'+value+'</a>';
+                         },
+                         events: {
+                             'click .goods_sku': function(e, value, row, index) {
+                                 window.open(value);
+                             }
+                         }
+                     }, {
+                         field : 'product_size',
+                         title : '商品配置',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle'
+                     }, {
+                         field : 'product_color',
+                         title : '商品颜色',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle'
+                     } , {
+                         field : 'content',
+                         title : '评论内容',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle'
+                     },{
+                         field : 'reference_time',
+                         title : '评论时间',
+                         rowspan: 1,
+                         colspan: 1,
+                         align: 'left',
+                         halign: 'center',
+                         falign: 'right',
+                         valign: 'middle'
+                     },{
+                         field: 'column_operate',
+                         title: '操作',
+                         formatter: function(value, row, index) {
+                             return '<a href="javascript:void(0);" class="say_hi">点我</a>';
+                         },
+                         events: {
+                             'click .say_hi': function(e, value, row, index) {
+                                 alert(row.name + ' 你好');
+                             }
+                         }
+                     } ]
+             });
+         });
+        loadData();
+     </script>
+</head>
+<body>
+<style>
+html, body, #main {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+</style>
+<div style=" margin:10px;display: flex;flex-direction: column;overflow: hidden;background-color: #ffffff;height: 1600px;
+    /* width: 100%; */box-shadow: 0px 1px 5px rgba(215, 215, 215, 0.8);padding: 10px; border-radius: 2px;">
+    <div style=" padding: 10px;width: 100%;display: flex;flex-direction: row;height: 500px">
+        <div style=" margin-right: 20px;width: 48%;display: flex;height: 100%;border:1px solid #9acfea">
+         <div id="pie" style="width:781px;height:356px;"></div>
+        </div>
+        <div style="flex-direction: column;overflow: hidden;width:48%;display: flex;border:1px solid #9acfea">
+            <div id="title"><h3 style="color: #b2dba1;text-align: center">商品分析词云图</h3></div>
+            <div id="main" style="text-align: center"></div>
+            <script>
+                $(function(){
+                    echartsCloud();//初始化echarts图
+                })
+                function echartsCloud(){
+                    // 基于准备好的dom，初始化echarts实例
+                    var myChart = echarts.init(document.getElementById('main'));
+
+                    myChart.setOption({
+                        tooltip: {},
+                        series: [{
+                            name: '热点分析',
+                            type : 'wordCloud',  //类型为字符云
+                            shape:'smooth',  //平滑
+                            gridSize : 1, //网格尺寸
+                            size : ['80%','80%'],
+                            sizeRange : [ 15, 30 ],
+                            rotationRange : [ -45, 90 ], //旋转范围
+                            autoSize: {
+                              enable: true,
+                              minSize: 6,
+                              maxSize: 20
+                            },
+                            textStyle : {
+                                normal : {
+                                    fontFamily:'sans-serif',
+                                    color : function() {
+                                        return 'rgb('
+                                            + [ Math.round(Math.random() * 160),
+                                                Math.round(Math.random() * 160),
+                                                Math.round(Math.random() * 160) ]
+                                                .join(',') + ')';
+                                    }
+                                },
+                                emphasis : {
+                                    shadowBlur : 5,  //阴影距离
+                                    shadowColor : '#333'  //阴影颜色
+                                }
+                            },
+                            data: []
+                        }]
+                    });
+                    // 异步加载数据
+                     $.get('test/queryMatchWordCloudData?goodsSku='+goodsSku).done(function (data) {
+                     	var resule = JSON.parse(data);
+                         // 填入数据
+                   	     myChart.setOption({
+                         	series: [{
+                                 data: resule
+                             }]
+                         });
+                    });
+                }
+
+
+            </script>
+        </div>
+    </div>
+    <div style=" margin-top:10px;padding: 20px;border:1px solid #9acfea;height: 100%;margin: 10px">
+     <table id="table"></table>
+    </div>
+</div>
+
+</body>
+</html>

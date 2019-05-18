@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JDSearch</title>
+<link href="../../plugins/css/bootstrap.css" rel="stylesheet">
+<link href="../../plugins/bootstrap-table/bootstrap-table.min.css"
+	rel="stylesheet">
+<script src="../plugins/jquery/jquery-3.3.1.min.js"></script>
+<script src="../plugins/js/bootstrap.min.js"></script>
+<script src="../plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script
+	src="../plugins/bootstrap-table/bootstrap-table-locale-all.min.js"></script>
+<script type="text/javascript">
+function tableHeight() {
+    var h = $(window).height();
+    return h-25;
+}
+$(window).resize(function () {
+    $("#table").bootstrapTable('resetView', {
+        height: tableHeight()
+    });
+});
+$("#table").bootstrapTable("refresh");//表格刷新数据
+        $(function() {
+            <!--初始化表格的样式 -->
+            $('#table').bootstrapTable({
+                toolbar: '#toolbar',        //工具按钮用哪个容器
+                striped: true,           //是否显示行间隔色
+                cache: false,            //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,          //是否显示分页（*）
+                sortable: false,           //是否启用排序
+                sortOrder: "asc",          //排序方式
+                queryParams: function (pageRequest) {
+                    return pageRequest;
+                },
+                //传递参数（*）
+               	sidePagination: "client",      //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,            //初始化加载第一页，默认第一页
+                pageSize: 10,            //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],    //可供选择的每页的行数（*） */
+                search: true,            //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                strictSearch: true,
+                showColumns: true,         //是否显示所有的列
+                showRefresh: true,         //是否显示刷新按钮
+                minimumCountColumns: 2,       //最少允许的列数
+                clickToSelect: true,        //是否启用点击选中行
+                //height: tableHeight(),            //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Id",           //每一行的唯一标识，一般为主键列
+                showToggle: true,          //是否显示详细视图和列表视图的切换按钮
+                cardView: false,          //是否显示详细视图
+                detailView: true,          //是否显示父子表
+                showExport: true, //是否显示导出按钮
+                buttonsAlign: "right", //按钮位置
+                exportTypes: ['excel'], //导出文件类型
+                Icons: 'glyphicon-export',
+                columns : [ {
+                    field : 'goods_name',
+                    title : '商品标题'
+                }, {
+                    field : 'goods_style',
+                    title : '商品颜色'
+                }, {
+                    field : 'goods_sku',
+                    title : '商品链接'
+                }, {
+                    field : 'goods_price',
+                    title : '商品价格'
+                } , {
+                    field : 'comment_count',
+                    title : '商品评论数'
+                } ]
+            });
+            //为submit按钮绑定click事件,填充点击查询后的数据查询
+            $("#submit").click(function() {
+                $.ajax({
+                    url : '/test/queryMatchData',
+                    contenType: 'application/json',
+                    data : "context=" + $("#context").val(),
+                    cache : false,//false是不缓存，true为缓存
+                    async : true,//true为异步，false为同步
+                    beforeSend : function() {
+                        //请求前
+                    },
+                    success : function(result) {
+                        try {
+                            var resultArray = new Array();
+                            resultArray = JSON.parse(result);
+                            $("#table").bootstrapTable('load', resultArray);
+                        } catch (e) {
+                            window.alert(result);
+                            $("#table").bootstrapTable('load', [ {
+                                "result" : "什么也没有找到"
+                            } ]);
+                        }
+                    },
+                    complete : function() {
+                        //请求结束时
+                    },
+                    error : function() {
+                        //请求失败时
+                    }
+                })
+            });
+        });
+    </script>
+</head>
+<body>
+	<div class="container"
+		style="text-align: center; vertical-align: middle; height: 100%; width: 100%;">
+		<div class="row" style="margin: 30px;">
+			<!-- onsubmit设置成return false,不再显式提交form -->
+			<div style="align-items: center; margin: auto; margin-bottom: 30px">
+				<span style="font-family: STKaiti; color: #28a4c9"><h1>JD商品查询</h1></span>
+			</div>
+			<div class="col-md-8 col-md-offset-2 text-center"
+				onsubmit="return false">
+				<form class="form-inline">
+					<div class="form-group">
+						<label for="mid"></label> <input type="text" class="form-control"
+							id="context" name="context" style="width: 400px; height: 50px"
+							placeholder="请输入商品名称">
+					</div>
+					<button type="submit" id="submit" class="btn btn-primary"
+						style="width: 100px; height: 50px">查询</button>
+				</form>
+			</div>
+		</div>
+		<!-- 在下一行中，添加一个bs系统自带的表格 -->
+		<div class="row" style="width: 95%; margin: auto">
+			<table id="table"></table>
+		</div>
+	</div>
+</body>
+</html>

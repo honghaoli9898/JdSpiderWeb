@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta charset="utf-8"></meta>
+<script src='../plugins/jquery/jquery-3.3.1.min.js'></script>
+<script src='../plugins/js/echarts.simple.js'></script>
+<script src='../plugins/js/echarts-wordcloud.js'></script>
+</head>
+<body>
+<div id="title" style="text-align: center"><h3 style="color: #b2dba1;text-align: center ">词云图</h3></div>
+    <div id="main" style="width:600px;height:400px;">
+    </div>
+    <script>
+    $(function(){
+        echartsCloud();//初始化echarts图
+    })
+function echartsCloud(){
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+    myChart.setOption({
+        tooltip: {},
+        series: [{
+            name: '热点分析',
+            type : 'wordCloud',  //类型为字符云
+                shape:'smooth',  //平滑
+                gridSize : 1, //网格尺寸
+                size : ['80%','80%'],
+                //sizeRange : [ 0, 100 ],
+                rotationRange : [ -90, 90 ], //旋转范围
+                textStyle : {  
+                    normal : {
+                        fontFamily:'sans-serif',
+                        color : function() {  
+                            return 'rgb('  
+                                    + [ Math.round(Math.random() * 160),  
+                                            Math.round(Math.random() * 160),  
+                                            Math.round(Math.random() * 160) ]  
+                                            .join(',') + ')';  
+                        }  
+                    },  
+                    emphasis : {  
+                        shadowBlur : 5,  //阴影距离
+                        shadowColor : '#333'  //阴影颜色
+                    }  
+                },
+                data:[
+                        {
+                            name: '流畅至极',
+                            value: 507
+                        },
+                        {
+                            name: '时尚美观',
+                            value: 503
+                        },
+                        {
+                            name: '反应超快',
+                            value: 501
+                        },
+                        {
+                            name: '漂亮大方',
+                            value: 472
+                        },
+                        {
+                            name: '大小适宜',
+                            value: 307
+                        },
+                        {
+                            name: '清晰度高',
+                            value: 268
+                        },
+                        {
+                            name: '颜色绚丽',
+                            value: 260
+                        },
+                        {
+                            name: '使用舒适',
+                            value: 237
+                        },
+                        {   name: '拍摄功能强',
+                            value: 209
+                        }
+                    ]
+        }]
+    });
+    // 异步加载数据
+    // $.get('./json').done(function (data) {
+    // 	console.log(data);
+    // 	resule = JSON.parse(data);
+    // 	console.log(resule);
+    //     // 填入数据
+    //     myChart.setOption({
+    //     	series: [{
+    //             data: resule
+    //         }]
+    //     });
+    //});
+}  
+
+
+    </script>
+</body>
+</html>
